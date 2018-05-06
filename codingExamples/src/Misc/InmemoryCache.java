@@ -18,7 +18,9 @@ public class InmemoryCache<K,T> {
 	}
 	public InmemoryCache(long timeToLive,final long timeInterval,int maxItems){
 		this.timeToLive = (timeToLive * 1000);
+		inmemoryCacheMap = new LRUMap(maxItems);
 		
+		if(timeToLive > 0 && timeInterval > 0){
 		Thread thread = new Thread(new Runnable() {
 			
 			@Override
@@ -33,7 +35,7 @@ public class InmemoryCache<K,T> {
 		thread.setDaemon(true);
 		thread.start();
 	}
-	
+	}
 	public void put(K key,T value) {
 		synchronized(inmemoryCacheMap) {
 			inmemoryCacheMap.put(key, value);
@@ -54,7 +56,11 @@ public class InmemoryCache<K,T> {
 			inmemoryCacheMap.remove(key);
 		}
 	}
-	
+	public int size() {
+		synchronized(inmemoryCacheMap) {
+			return inmemoryCacheMap.size();
+		}
+	}
 	public void cleanup() {
 		long now = System.currentTimeMillis();
 		ArrayList deleteKeys = new ArrayList<K>();
